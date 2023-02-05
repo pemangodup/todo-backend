@@ -1,9 +1,15 @@
+const Note = require('../model/Note');
 const notes = {
   // @desc     Add Notes
   // @route    POST /todo/v1/api/
   // @access   Private
   addNote: (req, res, next) => {
     console.log('Addnote');
+    const { title, note } = req.body;
+    if (!title || !note) {
+      console('Inside here');
+      return new Error('Title of note field is empty');
+    }
   },
 
   // @desc     Get All Notes

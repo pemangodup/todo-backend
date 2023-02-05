@@ -24,7 +24,7 @@ const noteRoutes = require('./routes/noteRoutes');
 
 //
 app.use('/todo/v1/api/auth', authRoutes);
-app.use('./todo/v1/api/note', noteRoutes);
+app.use('/todo/v1/api/note', noteRoutes);
 
 app.use((err, req, res, next) => {
   let error = { ...err };
