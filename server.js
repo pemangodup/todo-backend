@@ -1,13 +1,47 @@
-const express = require('express')
-const app = express()
-const dotenv = require('dotenv')
-const colors = require('colors')
+const express = require('express');
+const app = express();
+const dotenv = require('dotenv');
+const colors = require('colors');
+const db = require('./config/db');
+const cors = require('cors');
 
 // Initializing config file
-dotenv.config({path: './config/config.env'})
+dotenv.config({ path: './config/config.env' });
 
+// Cors protection
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+  })
+);
+
+// JSON parser
+app.use(express.json());
+
+// Routes
+const authRoutes = require('./routes/authRoutes');
+const noteRoutes = require('./routes/noteRoutes');
+
+//
+app.use('/todo/v1/api/auth', authRoutes);
+app.use('./todo/v1/api/note', noteRoutes);
+
+app.use((err, req, res, next) => {
+  let error = { ...err };
+  console.log(error);
+  res.status(400).json({
+    success: false,
+    data: null,
+  });
+});
 // Port no.
 const port = process.env.PORT || 5000;
-app.listen(port, () => {
-    console.log(`Running on port no ${port}`.rainbow)
-})
+db()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Running on port no ${port}`.rainbow);
+    });
+  })
+  .catch((error) => {
+    console.log(error);
+  });
