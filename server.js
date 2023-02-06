@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const colors = require('colors');
 const db = require('./config/db');
 const cors = require('cors');
+const errorMiddleware = require('./middleware/error');
 
 // Initializing config file
 dotenv.config({ path: './config/config.env' });
@@ -26,15 +27,8 @@ const noteRoutes = require('./routes/noteRoutes');
 app.use('/todo/v1/api/auth', authRoutes);
 app.use('/todo/v1/api/note', noteRoutes);
 
-app.use((err, req, res, next) => {
-  let error = { ...err };
-  console.log(error);
-  res.status(400).json({
-    success: false,
-    data: null,
-  });
-});
-// Port no.
+app.use(errorMiddleware);
+// Port number
 const port = process.env.PORT || 5000;
 db()
   .then(() => {

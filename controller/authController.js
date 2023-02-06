@@ -1,4 +1,6 @@
 const User = require('../model/User');
+const jsonResponse = require('../Utils/jsonResponse');
+
 const auth = {
   // @desc     Register User
   // @route    POST /todo/v1/api
@@ -9,17 +11,11 @@ const auth = {
     user = await User.findOne({ email });
     if (user) {
       console.log('User already exist');
-      res.status(200).json({
-        success: false,
-        message: 'User already exist',
-      });
+      jsonResponse(res, 404, false, 'User already exists', '');
       return;
     }
     user = await User.create(req.body);
-    res.status(200).json({
-      success: true,
-      data: user,
-    });
+    jsonResponse(res, 200, true, 'User Created', user);
   },
 
   // @desc     Login User
@@ -29,22 +25,21 @@ const auth = {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'The entered email is incorrect',
-      });
+      return jsonResponse(
+        res,
+        400,
+        false,
+        'The entered email is incorrect',
+        ''
+      );
     }
     const response = await user.comparePassword(password);
     if (!response) {
-      return res.status(404).json({
-        success: false,
-        message: 'Password does not match',
-      });
+      return jsonResponse(res, 404, false, 'Password does not match', '');
     }
 
     if (response) {
       const token = user.getJsonWebToken();
-
       res.status(404).json({
         success: true,
         token,
