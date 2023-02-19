@@ -13,7 +13,6 @@ const notes = {
       const noteCreated = await Note.create(req.body);
       jsonResponse(res, 200, true, 'Note Created', noteCreated);
     } catch (error) {
-      console.log('Am i here');
       return next(new errorResponse(error.message, 404));
     }
   },
@@ -40,7 +39,6 @@ const notes = {
     const id = req.params.id;
     try {
       const note = await Note.findOne({ _id: id, userId });
-      console.log(note);
       if (!note) {
         return jsonErrorResponse(res, 'Could not find note.');
       }
@@ -91,6 +89,7 @@ const notes = {
 
 module.exports = notes;
 
+// Repeated json response
 const jsonErrorResponse = (res, message) => {
   return jsonResponse(res, 404, false, message, 'No data');
 };
