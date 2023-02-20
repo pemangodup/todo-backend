@@ -26,7 +26,6 @@ const UserSchema = new mongoose.Schema({
 //Encrypting password using bcrypt
 UserSchema.pre('save', async function () {
   const salt = await bcrypt.genSalt(10);
-  console.log(this.password);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
@@ -38,7 +37,7 @@ UserSchema.methods.comparePassword = async function (enteredPassword) {
 // Getting JsonWebToken
 UserSchema.methods.getJsonWebToken = function () {
   return jwt.sign(
-    { id: this._id, exp: Math.floor(Date.now() / 1000) + 60 * 10 },
+    { id: this._id, exp: Math.floor(Date.now() / 1000) + 60 * 60 },
     process.env.JWT_SECRET
   );
 };

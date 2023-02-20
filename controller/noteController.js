@@ -11,7 +11,7 @@ const notes = {
     req.body.userId = req.user._id;
     try {
       const noteCreated = await Note.create(req.body);
-      jsonResponse(res, 200, true, 'Note Created', noteCreated);
+      jsonResponse(res, 200, true, 'Note Created', 1, noteCreated);
     } catch (error) {
       return next(new errorResponse(error.message, 404));
     }
@@ -21,11 +21,17 @@ const notes = {
   // @route    GET /todo/v1/api/note
   // @access   Private
   getNotes: async (req, res, next) => {
-    const userId = req.user._id;
-    console.log(userId);
+    console.log(req.query);
     try {
-      const notes = await Note.find({ userId });
-      jsonResponse(res, 200, true, 'All notes.', notes);
+      let notes;
+      if (req.query) {
+        notes = await Note.find(req.query);
+      } else {
+        notes = await Note.find();
+      }
+
+      const total = notes.length;
+      jsonResponse(res, 200, true, 'All notes.', total, notes);
     } catch (error) {
       return next(new ErrorResponse(error.message, 404));
     }
