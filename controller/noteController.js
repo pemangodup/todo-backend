@@ -21,18 +21,34 @@ const notes = {
   // @route    GET /todo/v1/api/note
   // @access   Private
   getNotes: async (req, res, next) => {
-    console.log(req.query);
+    let query;
+    const queryStr = { ...req.query };
+    const removeFields = ['select', 'sort', 'page', 'limit'];
+    removeFields.forEach((param) => {
+      delete queryStr[param];
+    });
+    // Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    query = await Note.find(queryStr).skip(startIndex).limit(limit);
     try {
-      let notes;
-      if (req.query) {
-        notes = await Note.find(req.query);
-      } else {
-        notes = await Note.find();
-      }
+      // // Selecting
+      // if (req.query.select) {
+      //   const fields = req.query.select.split(',').join(' ');
+      //   query = await query.select(fields);
+      // }
+      // // Sorting
+      // if (req.query.sort) {
+      //   const sortBy = req.query.sortt.split(',').join(' ');
+      //   query = await query.sort(sortBy);
+      // }
+      const total = query.length;
 
-      const total = notes.length;
-      jsonResponse(res, 200, true, 'All notes.', total, notes);
+      query = jsonResponse(res, 200, true, 'All notes.', total, query);
     } catch (error) {
+      console.log('I reached here three');
       return next(new ErrorResponse(error.message, 404));
     }
   },

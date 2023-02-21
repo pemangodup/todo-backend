@@ -16,6 +16,7 @@ const NoteSchema = new mongoose.Schema({
     type: String,
     required: [true, 'User id is not given for specific note'],
   },
+  num: Number,
 });
 
 module.exports = mongoose.model('Note', NoteSchema);
