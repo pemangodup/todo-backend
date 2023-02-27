@@ -34,16 +34,6 @@ const notes = {
     const endIndex = page * limit;
     query = await Note.find(queryStr).skip(startIndex).limit(limit);
     try {
-      // // Selecting
-      // if (req.query.select) {
-      //   const fields = req.query.select.split(',').join(' ');
-      //   query = await query.select(fields);
-      // }
-      // // Sorting
-      // if (req.query.sort) {
-      //   const sortBy = req.query.sortt.split(',').join(' ');
-      //   query = await query.sort(sortBy);
-      // }
       const total = query.length;
 
       query = jsonResponse(res, 200, true, 'All notes.', total, query);

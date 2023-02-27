@@ -3,6 +3,7 @@ const errorResponse = require('../Utils/errorResponse');
 const jwt = require('jsonwebtoken');
 const User = require('../model/User');
 const auth = {
+  // Verifying the token
   protect: async (req, res, next) => {
     let token;
     if (

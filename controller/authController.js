@@ -10,7 +10,6 @@ const auth = {
     let user;
     user = await User.findOne({ email });
     if (user) {
-      console.log('User already exist');
       jsonResponse(res, 404, false, 'User already exists', '');
       return;
     }
@@ -23,28 +22,36 @@ const auth = {
   // @access   Public
   login: async (req, res, next) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) {
-      return jsonResponse(
-        res,
-        400,
-        false,
-        'The entered email is incorrect',
-        ''
-      );
-    }
-    const response = await user.comparePassword(password);
-    if (!response) {
-      return jsonResponse(res, 404, false, 'Password does not match', '');
-    }
-
-    if (response) {
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return jsonResponse(
+          res,
+          400,
+          false,
+          'The entered email is incorrect',
+          ''
+        );
+      }
+      const response = await user.comparePassword(password);
+      if (!response) {
+        const error = new Error('Password does not match');
+        error.statusCode = 401;
+        throw error;
+      }
       const token = user.getJsonWebToken();
       res.status(404).json({
         success: true,
         token,
         data: user,
       });
+      return;
+    } catch (error) {
+      if (!error.statusCode) {
+        error.statusCode = 500;
+      }
+      next(error);
+      return error;
     }
   },
 };
