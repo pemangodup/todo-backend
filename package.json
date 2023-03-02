@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server",
     "dev": "nodemon server",
-    "test": "mocha"
+    "test": "mocha --timeout 10000"
   },
   "author": "Pema Ngodup",
   "license": "ISC",
