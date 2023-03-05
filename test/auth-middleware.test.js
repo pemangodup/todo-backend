@@ -1,5 +1,4 @@
-const chai = require('chai');
-const expect = chai.expect;
+const { expect } = require('chai');
 const sinon = require('sinon');
 const jwt = require('jsonwebtoken');
 const User = require('../model/User');

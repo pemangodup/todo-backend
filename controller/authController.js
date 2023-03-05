@@ -1,5 +1,6 @@
 const User = require('../model/User');
 const jsonResponse = require('../Utils/jsonResponse');
+const errorResponse = require('../Utils/errorResponse');
 
 const auth = {
   // @desc     Register User
@@ -8,13 +9,17 @@ const auth = {
   register: async (req, res, next) => {
     const { email, password } = req.body;
     let user;
-    user = await User.findOne({ email });
-    if (user) {
-      jsonResponse(res, 404, false, 'User already exists', '');
-      return;
+    try {
+      user = await User.findOne({ email });
+      if (user) {
+        jsonResponse(res, 400, false, 'User already exists', '');
+      } else {
+        user = await User.create(req.body);
+        jsonResponse(res, 200, true, 'User Created', user);
+      }
+    } catch (error) {
+      return next(new errorResponse(error.message, 400));
     }
-    user = await User.create(req.body);
-    jsonResponse(res, 200, true, 'User Created', user);
   },
 
   // @desc     Login User
