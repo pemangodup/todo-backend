@@ -38,6 +38,7 @@ const auth = {
           ''
         );
       }
+
       const response = await user.comparePassword(password);
       if (!response) {
         const error = new Error('Password does not match');

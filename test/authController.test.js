@@ -1,9 +1,10 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
-
 const User = require('../model/User');
 const { register, login } = require('../controller/authController');
+const mongoose = require('mongoose');
 
+// Unit test for register controller
 describe('Register', function () {
   this.afterEach(() => {
     sinon.restore();
@@ -70,7 +71,7 @@ describe('Register', function () {
       },
     };
     const next = sinon.spy();
-    sinon.stub(User, 'findOne').throws('hehehe');
+    sinon.stub(User, 'findOne').throws();
     await register(req, res, next);
     console.log(next.args[0][0].message);
     expect(next.args[0][0].statusCode).to.equal(400);
@@ -79,6 +80,9 @@ describe('Register', function () {
 
 // Unit testing for login function
 describe('Login', () => {
+  afterEach(() => {
+    sinon.restore();
+  });
   it('should throw incorrect email if no user is registered in given email id', async () => {
     const req = {
       body: { email: 'test@test.com' },
@@ -100,5 +104,46 @@ describe('Login', () => {
     await login(req, res, next);
     expect(res.statusCode).to.equal(400);
     expect(res.data.message).to.equal('The entered email is incorrect');
+  });
+
+  it('should return an error if the password is incorrect', async function () {
+    try {
+      mongoose.set('strictQuery', false);
+      const conn = await mongoose.connect(
+        'mongodb+srv://pema:atlasmongo2021@cluster0.9wgye.mongodb.net/todotest'
+      );
+      console.log('Got connected');
+    } catch (error) {
+      console.log(error);
+    }
+    const user = new User({
+      email: 'test@example.com',
+      password: 'password123',
+    });
+    await user.save();
+
+    const req = {
+      body: {
+        email: 'test@example.com',
+        password: 'wrongpassword',
+      },
+    };
+    const res = {};
+    sinon.stub(User, 'findOne').resolves(user);
+
+    const response = await login(req, res, () => {});
+
+    expect(response.statusCode).to.equal(401);
+    expect(response.message).to.equal('Password does not match');
+
+    User.deleteMany()
+      .then(() => {
+        return mongoose.disconnect(() => {
+          console.log('Got disconnected');
+        });
+      })
+      .then(() => {
+        done();
+      });
   });
 });
