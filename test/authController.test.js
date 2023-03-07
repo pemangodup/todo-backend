@@ -75,7 +75,6 @@ describe('Register', function () {
     const next = sinon.spy();
     sinon.stub(User, 'findOne').throws();
     await register(req, res, next);
-    console.log(next.args[0][0].message);
     expect(next.args[0][0].statusCode).to.equal(400);
   });
 });
@@ -85,6 +84,8 @@ describe('Login', () => {
   afterEach(() => {
     sinon.restore();
   });
+
+  //
   it('should throw incorrect email if no user is registered in given email id', async () => {
     const req = {
       body: { email: 'test@test.com' },
@@ -108,20 +109,9 @@ describe('Login', () => {
     expect(res.data.message).to.equal('The entered email is incorrect');
   });
 
+  //
   it('should return an error if the password is incorrect', async function () {
-    try {
-      mongoose.set('strictQuery', false);
-      const conn = await mongoose.connect(process.env.MONGO_URI_TEST);
-      console.log('Got connected');
-    } catch (error) {
-      console.log(error);
-    }
-    const user = new User({
-      email: 'test@example.com',
-      password: 'password123',
-    });
-    await user.save();
-
+    const user = dbConnect();
     const req = {
       body: {
         email: 'test@example.com',
@@ -130,20 +120,59 @@ describe('Login', () => {
     };
     const res = {};
     sinon.stub(User, 'findOne').resolves(user);
-
     const response = await login(req, res, () => {});
-
     expect(response.statusCode).to.equal(401);
     expect(response.message).to.equal('Password does not match');
+    dbDisconnect();
+  });
 
-    User.deleteMany()
-      .then(() => {
-        return mongoose.disconnect(() => {
-          console.log('Got disconnected');
-        });
-      })
-      .then(() => {
-        done();
-      });
+  //
+  it('should send token as a response', async () => {
+    const user = dbConnect();
+    const req = { body: { email: 'test@test.com', password: 'password123' } };
+    const res = {
+      statusCode: null,
+      data: null,
+      status: function (code) {
+        this.statusCode = code;
+        return this;
+      },
+      json: function (data) {
+        this.data = data;
+      },
+    };
+    sinon.stub(User, 'findOne').resolves(user);
+    await login(req, res, () => {});
+    expect(res.statusCode).to.equal(200);
+    expect(res.data.token).to.not.be.empty;
+    dbDisconnect();
   });
 });
+
+// Function connecting to the database and creating a user
+const dbConnect = async function () {
+  try {
+    mongoose.set('strictQuery', false);
+    const conn = await mongoose.connect(process.env.MONGO_URI_TEST);
+  } catch (error) {
+    console.log(error);
+  }
+  const user = new User({
+    email: 'test@example.com',
+    password: 'password123',
+  });
+  return await user.save();
+};
+
+// Function disconnecting the database and deleting all the data in user documents
+const dbDisconnect = async () => {
+  User.deleteMany()
+    .then(() => {
+      return mongoose.disconnect(() => {
+        console.log('Disconnect.');
+      });
+    })
+    .then(() => {
+      done();
+    });
+};

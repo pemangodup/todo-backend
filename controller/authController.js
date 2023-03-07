@@ -45,8 +45,9 @@ const auth = {
         error.statusCode = 401;
         throw error;
       }
+
       const token = user.getJsonWebToken();
-      res.status(404).json({
+      res.status(200).json({
         success: true,
         token,
         data: user,
