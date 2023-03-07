@@ -4,6 +4,8 @@ const User = require('../model/User');
 const { register, login } = require('../controller/authController');
 const mongoose = require('mongoose');
 
+require('dotenv').config({ path: __dirname + '/../config/config.env' });
+
 // Unit test for register controller
 describe('Register', function () {
   this.afterEach(() => {
@@ -109,9 +111,7 @@ describe('Login', () => {
   it('should return an error if the password is incorrect', async function () {
     try {
       mongoose.set('strictQuery', false);
-      const conn = await mongoose.connect(
-        'mongodb+srv://pema:atlasmongo2021@cluster0.9wgye.mongodb.net/todotest'
-      );
+      const conn = await mongoose.connect(process.env.MONGO_URI_TEST);
       console.log('Got connected');
     } catch (error) {
       console.log(error);
